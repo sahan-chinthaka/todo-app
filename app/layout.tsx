@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/auth";
 
 export const metadata: Metadata = {
   title: "Todo App",
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main className="p-5">{children}</main>
+        <AuthProvider>
+          <Header />
+          <main className="p-5">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );
