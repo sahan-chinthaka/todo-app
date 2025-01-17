@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ForgotPassword from "./forgot-password";
 
 function SignInPage() {
   const [disabled, setDisabled] = useState(false);
@@ -90,9 +91,7 @@ function SignInPage() {
                 </FormItem>
               )}
             />
-            <div className="cursor-pointer text-center text-sm text-gray-500">
-              Forgot password?
-            </div>
+            <ForgotPassword />
             <Button type="submit" disabled={disabled} className="w-full">
               Sign in
             </Button>
