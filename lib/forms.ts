@@ -7,6 +7,7 @@ export const SignInFormSchema = z.object({
 
 export const SignUpFormSchema = z
   .object({
+    name: z.string().trim().min(3, "Minimum name length is 3"),
     email: z.string().email(),
     password: z.string().min(6, "Minimum password length is 6"),
     passwordConfirm: z.string(),

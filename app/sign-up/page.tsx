@@ -13,11 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Auth } from "@/lib/firebase";
 import { SignUpFormSchema } from "@/lib/forms";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 function SignUpPage() {
@@ -27,6 +28,7 @@ function SignUpPage() {
   const form = useForm<z.infer<typeof SignUpFormSchema>>({
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       passwordConfirm: "",
@@ -36,8 +38,16 @@ function SignUpPage() {
   function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
     setDisabled(true);
     createUserWithEmailAndPassword(Auth, values.email, values.password)
-      .then(() => {
-        router.push("/sign-in");
+      .then((cred) => {
+        updateProfile(cred.user, { displayName: values.name })
+          .then(() => {
+            router.push("/sign-in");
+            toast.success("Account created successfully");
+          })
+          .catch((e) => {
+            toast.error(e.code);
+            setDisabled(false);
+          });
       })
       .catch((e) => {
         console.log(e.code);
@@ -45,9 +55,8 @@ function SignUpPage() {
           form.setError("email", {
             message: "Email already in use",
           });
-        }
-      })
-      .finally(() => {
+          toast.error("Email already in use");
+        } else toast.error(e.code);
         setDisabled(false);
       });
   }
@@ -61,6 +70,23 @@ function SignUpPage() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-5 space-y-5"
           >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Full Name"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
