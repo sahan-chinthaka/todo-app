@@ -16,7 +16,7 @@ function Header() {
       <div className="ml-auto">
         {auth && (
           <Link href="/account">
-            <Button>Account</Button>
+            <Button variant="outline">Account</Button>
           </Link>
         )}
         {auth === null && (
