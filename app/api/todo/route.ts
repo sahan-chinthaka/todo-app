@@ -1,7 +1,6 @@
 import { loggedUser } from "@/lib/firebase-admin";
 import { TodoFormSchema } from "@/lib/forms";
 import connectMongo from "@/lib/mongodb";
-import { TodoType } from "@/lib/types";
 import Todo from "@/models/todo";
 import { NextRequest, NextResponse } from "next/server";
 
