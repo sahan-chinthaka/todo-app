@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     if (!uid) throw new Error("Unauthorized");
 
-    const todos = await Todo.find({ userId: uid });
+    const todos = await Todo.find({ userId: uid }).sort({ date: 1 });
 
     return NextResponse.json({ done: true, todos });
   } catch (error: any) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const zData = TodoFormSchema.parse(data);
 
-    const todo = new Todo<TodoType>({
+    const todo = new Todo({
       name: zData.name,
       description: zData.description,
       date: zData.date,
