@@ -19,8 +19,8 @@ function AddTodo() {
   const [date, setDate] = useState<Date>();
   const [disabled, setDisabled] = useState(false);
   const [dateOption, setDateOption] = useState<
-    "today" | "tomorrow" | "next-week" | "date" | undefined
-  >(undefined);
+    "today" | "tomorrow" | "next-week" | "date" | ""
+  >("");
 
   function submit(e: any) {
     e.preventDefault();
@@ -76,7 +76,7 @@ function AddTodo() {
           <Select
             name="date"
             onValueChange={(value: any) =>
-              setDateOption(value == "remove" ? null : value)
+              setDateOption(value == "remove" ? "" : value)
             }
             defaultValue={dateOption}
             value={dateOption}
@@ -122,9 +122,21 @@ function AddTodo() {
               </PopoverContent>
             </Popover>
           )}
-          <Button disabled={disabled} className="sm:ml-auto" type="submit">
-            Add
-          </Button>
+          <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              type="reset"
+              onClick={() => {
+                setDate(undefined);
+                setDateOption("");
+              }}
+            >
+              Clear
+            </Button>
+            <Button disabled={disabled} type="submit">
+              Add
+            </Button>
+          </div>
         </div>
       </div>
     </form>

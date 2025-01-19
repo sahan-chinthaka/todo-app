@@ -2,6 +2,7 @@
 
 import AddTodo from "@/components/add-todo";
 import TodoView from "@/components/todo-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth";
 import { TodoType } from "@/lib/types";
 import { api, cn } from "@/lib/utils";
@@ -21,11 +22,48 @@ interface IDatedTodo {
 export default function Home() {
   const auth = useAuth();
   const [todos, setTodos] = useState<TodoType[]>();
-  const [active, setActive] = useState<Filter>(Filter.All);
+  const [filter, setFilter] = useState<Filter>(Filter.All);
+  const [filteredTodos, setFilteredTodos] = useState<TodoType[]>();
   const [datedTodos, setDatedTodos] = useState<IDatedTodo[]>();
 
   useEffect(() => {
-    if (!auth) return;
+    if (!todos) return;
+    if (filter === Filter.All) {
+      setFilteredTodos(todos);
+    } else if (filter === Filter.Today) {
+      setFilteredTodos(
+        todos.filter((todo) => {
+          if (!todo.date) return false;
+          const today = new Date();
+          return (
+            todo.date.getDate() === today.getDate() &&
+            todo.date.getMonth() === today.getMonth() &&
+            todo.date.getFullYear() === today.getFullYear()
+          );
+        }),
+      );
+    } else if (filter === Filter.Tommorow) {
+      setFilteredTodos(
+        todos.filter((todo) => {
+          if (!todo.date) return false;
+          const today = new Date();
+          const tommorow = new Date();
+          tommorow.setDate(today.getDate() + 1);
+          return (
+            todo.date.getDate() === tommorow.getDate() &&
+            todo.date.getMonth() === tommorow.getMonth() &&
+            todo.date.getFullYear() === tommorow.getFullYear()
+          );
+        }),
+      );
+    }
+  }, [todos, filter]);
+
+  useEffect(() => {
+    if (auth === undefined) return;
+    if (auth === null) {
+      setTodos([]);
+    }
     api.get("/api/todo").then((res) => {
       if (res.data.done) {
         setTodos(
@@ -39,11 +77,11 @@ export default function Home() {
   }, [auth]);
 
   useEffect(() => {
-    if (!todos) return;
+    if (!filteredTodos) return;
     const todosWithNoDate: TodoType[] = [];
     const tempDatedTodos: IDatedTodo[] = [];
 
-    for (const todo of todos) {
+    for (const todo of filteredTodos) {
       if (!todo.date) {
         todosWithNoDate.push(todo);
       } else {
@@ -65,36 +103,38 @@ export default function Home() {
       }
     }
 
-    setDatedTodos([{ todos: todosWithNoDate }, ...tempDatedTodos]);
-  }, [todos]);
+    if (todosWithNoDate.length != 0)
+      setDatedTodos([{ todos: todosWithNoDate }, ...tempDatedTodos]);
+    else setDatedTodos(tempDatedTodos);
+  }, [filteredTodos]);
 
   return (
     <div className="container mx-auto">
       <AddTodo />
-      <div className="mt-10 flex space-x-2">
+      <div className="mt-10 flex justify-center gap-2 sm:justify-start">
         <span
-          onClick={() => setActive(Filter.All)}
+          onClick={() => setFilter(Filter.All)}
           className={cn(
             "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
-            active == "all" && "rounded-t border-b-primary bg-primary/5",
+            filter == "all" && "rounded-t border-b-primary bg-primary/5",
           )}
         >
           All
         </span>
         <span
-          onClick={() => setActive(Filter.Today)}
+          onClick={() => setFilter(Filter.Today)}
           className={cn(
             "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
-            active == "today" && "rounded-t border-b-primary bg-primary/5",
+            filter == "today" && "rounded-t border-b-primary bg-primary/5",
           )}
         >
           Today
         </span>
         <span
-          onClick={() => setActive(Filter.Tommorow)}
+          onClick={() => setFilter(Filter.Tommorow)}
           className={cn(
             "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
-            active == "tommorow" && "rounded-t border-b-primary bg-primary/5",
+            filter == "tommorow" && "rounded-t border-b-primary bg-primary/5",
           )}
         >
           Tommorow
@@ -102,6 +142,7 @@ export default function Home() {
       </div>
       <div className="mt-10">
         {datedTodos &&
+          datedTodos.length != 0 &&
           datedTodos.map((datedTodo, k) => (
             <div key={k}>
               {datedTodo.date && (
@@ -116,6 +157,27 @@ export default function Home() {
               </div>
             </div>
           ))}
+        {datedTodos && datedTodos.length == 0 && (
+          <div className="my-10">
+            <img
+              src="/not-found.webp"
+              alt="Not found image"
+              className="mx-auto block max-w-[400px]"
+            />
+            <p className="mt-4 text-center text-gray-400">
+              No todos found! <br /> Add some todos to get started.
+            </p>
+          </div>
+        )}
+        {!datedTodos && (
+          <div>
+            <Skeleton className="my-4 h-[50px]" />
+            <Skeleton className="my-4 h-[50px]" />
+            <Skeleton className="my-4 h-[20px] w-36 rounded-none" />
+            <Skeleton className="my-4 h-[50px]" />
+            <Skeleton className="my-4 h-[50px]" />
+          </div>
+        )}
       </div>
     </div>
   );
