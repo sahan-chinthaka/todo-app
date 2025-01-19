@@ -1,13 +1,21 @@
-import { ITodo } from "@/lib/types";
+import { TodoType } from "@/lib/types";
 import mongoose from "mongoose";
 
-const todoSchema = new mongoose.Schema<ITodo>({
+const todoSchema = new mongoose.Schema<TodoType>({
   name: {
     type: String,
     required: true,
   },
   description: {
     type: String,
+    required: false,
+  },
+  userId: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
     required: false,
   },
 });

@@ -21,3 +21,10 @@ export const SignUpFormSchema = z
       });
     }
   });
+
+export const TodoFormSchema = z.object({
+  name: z.string().trim().min(1, "Todo name shouldn't be empty"),
+  description: z.string().optional(),
+  date: z.coerce.date().optional(),
+  userId: z.string(),
+});

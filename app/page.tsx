@@ -1,105 +1,68 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import AddTodo from "@/components/add-todo";
+import TodoView from "@/components/todo-view";
 import { useAuth } from "@/context/auth";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { TodoType } from "@/lib/types";
+import { api, cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+
+enum Filter {
+  All = "all",
+  Today = "today",
+  Tommorow = "tommorow",
+}
 
 export default function Home() {
   const auth = useAuth();
-  const [date, setDate] = useState<Date>();
-  const [dateOption, setDateOption] = useState<
-    "today" | "tommorow" | "next-week" | "date" | undefined
-  >(undefined);
+  const [todos, setTodos] = useState<TodoType[]>();
+  const [active, setActive] = useState<Filter>(Filter.All);
+
+  useEffect(() => {
+    if (!auth) return;
+    api.get("/api/todo").then((res) => {
+      if (res.data.done) {
+        setTodos(res.data.todos);
+        console.log(res.data.todos);
+      }
+    });
+  }, [auth]);
 
   return (
     <div className="container mx-auto">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const formData = new FormData(e.target as HTMLFormElement);
-          console.log(formData, dateOption, date);
-        }}
-      >
-        <div className="flex flex-col gap-2 rounded border p-2">
-          <Input placeholder="Add a todo" name="name" />
-          <Textarea
-            placeholder="Describe your todo here (optional)"
-            className="max-h-[150px]"
-            name="description"
-          ></Textarea>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row">
-            <Select
-              name="date"
-              onValueChange={(value: any) =>
-                setDateOption(value == "remove" ? null : value)
-              }
-              defaultValue={dateOption}
-              value={dateOption}
-            >
-              <SelectTrigger className="w-auto sm:w-[120px]">
-                <SelectValue placeholder="Due Date" />
-              </SelectTrigger>
-              <SelectContent className="w-auto">
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                <SelectItem value="next-week">Next week</SelectItem>
-                <SelectItem value="date">Pick a date</SelectItem>
-                {dateOption && (
-                  <SelectItem value="remove" className="w-full cursor-pointer">
-                    <div className="w-full border p-2 text-center text-destructive">
-                      Remove Due Date
-                    </div>
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            {dateOption === "date" && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-auto justify-start text-left font-normal sm:w-[240px]",
-                      !date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon />
-                    {date ? date.toDateString() : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
-            <Button className="sm:ml-auto" variant="outline" type="submit">
-              Add
-            </Button>
-          </div>
-        </div>
-      </form>
+      <AddTodo />
+      <div className="mt-10 flex space-x-2">
+        <span
+          onClick={() => setActive(Filter.All)}
+          className={cn(
+            "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
+            active == "all" && "rounded-t border-b-primary bg-primary/5",
+          )}
+        >
+          All
+        </span>
+        <span
+          onClick={() => setActive(Filter.Today)}
+          className={cn(
+            "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
+            active == "today" && "rounded-t border-b-primary bg-primary/5",
+          )}
+        >
+          Today
+        </span>
+        <span
+          onClick={() => setActive(Filter.Tommorow)}
+          className={cn(
+            "block cursor-pointer border-b-2 border-b-primary/10 px-4 py-2",
+            active == "tommorow" && "rounded-t border-b-primary bg-primary/5",
+          )}
+        >
+          Tommorow
+        </span>
+      </div>
+      <div className="mt-10 space-y-2">
+        {todos && todos.map((todo, k) => <TodoView key={k} todo={todo} />)}
+      </div>
     </div>
   );
 }
