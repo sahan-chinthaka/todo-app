@@ -1,11 +1,11 @@
+import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { TodoType } from "@/lib/types";
 import { api } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
 import { Button } from "./ui/button";
 import { ToastAction } from "./ui/toast";
-import { useAuth } from "@/context/auth";
 
 function TodoView({
   todo,
