@@ -18,7 +18,7 @@ function TodoView({
   todos?: TodoType[];
 }) {
   const { toast } = useToast();
-  const duration = 5000;
+  const duration = 2500;
   const tempTodos = useRef<TodoType[] | undefined>(undefined);
   const auth = useAuth();
 
