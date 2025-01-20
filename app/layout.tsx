@@ -2,7 +2,7 @@ import Header from "@/components/header";
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Todo App",

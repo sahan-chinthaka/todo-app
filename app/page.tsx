@@ -59,11 +59,7 @@ export default function Home() {
     }
   }, [todos, filter]);
 
-  useEffect(() => {
-    if (auth === undefined) return;
-    if (auth === null) {
-      setTodos([]);
-    }
+  function updateTodos() {
     api.get("/api/todo").then((res) => {
       if (res.data.done) {
         setTodos(
@@ -74,6 +70,15 @@ export default function Home() {
         );
       }
     });
+  }
+
+  useEffect(() => {
+    if (auth === undefined) return;
+    if (auth === null) {
+      setTodos([]);
+    }
+
+    updateTodos();
   }, [auth]);
 
   useEffect(() => {
@@ -110,7 +115,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto">
-      <AddTodo />
+      <AddTodo update={updateTodos} />
       <div className="mt-10 flex justify-center gap-2 sm:justify-start">
         <span
           onClick={() => setFilter(Filter.All)}
@@ -152,7 +157,12 @@ export default function Home() {
               )}
               <div className="space-y-2">
                 {datedTodo.todos.map((todo) => (
-                  <TodoView todo={todo} key={todo._id} />
+                  <TodoView
+                    todo={todo}
+                    key={todo._id}
+                    todos={todos}
+                    setTodos={setTodos}
+                  />
                 ))}
               </div>
             </div>

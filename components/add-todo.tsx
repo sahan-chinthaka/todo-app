@@ -1,6 +1,6 @@
 import { api, cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
@@ -15,8 +15,9 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
-function AddTodo() {
+function AddTodo({ update }: { update: () => void }) {
   const [date, setDate] = useState<Date>();
+  const resetButton = useRef<HTMLButtonElement>(null);
   const [disabled, setDisabled] = useState(false);
   const [dateOption, setDateOption] = useState<
     "today" | "tomorrow" | "next-week" | "date" | ""
@@ -25,6 +26,13 @@ function AddTodo() {
   function submit(e: any) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+    const name = formData.get("name");
+
+    if (!name || name === "") {
+      return;
+    }
+
+    const description = formData.get("description");
 
     let d = date;
     if (dateOption === "today") {
@@ -43,13 +51,17 @@ function AddTodo() {
     api
       .post("/api/todo", {
         userId: "id",
-        name: formData.get("name"),
-        description: formData.get("description"),
+        name,
+        description,
         date: d,
       })
       .then((res) => {
         if (res.data.done) {
           toast.success("Todo added successfully");
+          update();
+          if (resetButton.current) {
+            resetButton.current.click();
+          }
         } else {
           toast.error(res.data.message);
         }
@@ -125,6 +137,7 @@ function AddTodo() {
           <div className="ml-auto flex gap-2">
             <Button
               variant="outline"
+              ref={resetButton}
               type="reset"
               onClick={() => {
                 setDate(undefined);
