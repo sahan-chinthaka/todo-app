@@ -53,7 +53,7 @@ export default function Home() {
           const today = new Date();
           const tommorow = new Date();
           tommorow.setDate(today.getDate() + 1);
-          return todo.date.toDateString() === today.toDateString();
+          return todo.date.toDateString() === tommorow.toDateString();
         }),
       );
     }
