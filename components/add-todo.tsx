@@ -196,6 +196,11 @@ function AddTodo({
             </Button>
           </div>
         </div>
+        {auth === null && (
+          <p className="p-4 text-center text-gray-400">
+            Sign in to sync and manage your todos across devices
+          </p>
+        )}
       </div>
     </form>
   );
