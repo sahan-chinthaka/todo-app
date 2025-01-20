@@ -28,32 +28,32 @@ export default function Home() {
 
   useEffect(() => {
     if (!todos) return;
+
+    const ordered = todos.sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date.getTime() - b.date.getTime();
+    });
+
     if (filter === Filter.All) {
-      setFilteredTodos(todos);
+      setFilteredTodos(ordered);
     } else if (filter === Filter.Today) {
       setFilteredTodos(
-        todos.filter((todo) => {
+        ordered.filter((todo) => {
           if (!todo.date) return false;
           const today = new Date();
-          return (
-            todo.date.getDate() === today.getDate() &&
-            todo.date.getMonth() === today.getMonth() &&
-            todo.date.getFullYear() === today.getFullYear()
-          );
+          return todo.date.toDateString() === today.toDateString();
         }),
       );
     } else if (filter === Filter.Tommorow) {
       setFilteredTodos(
-        todos.filter((todo) => {
+        ordered.filter((todo) => {
           if (!todo.date) return false;
           const today = new Date();
           const tommorow = new Date();
           tommorow.setDate(today.getDate() + 1);
-          return (
-            todo.date.getDate() === tommorow.getDate() &&
-            todo.date.getMonth() === tommorow.getMonth() &&
-            todo.date.getFullYear() === tommorow.getFullYear()
-          );
+          return todo.date.toDateString() === today.toDateString();
         }),
       );
     }
@@ -115,7 +115,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto">
-      <AddTodo update={updateTodos} />
+      <AddTodo update={updateTodos} todos={todos} setTodos={setTodos} />
       <div className="mt-10 flex justify-center gap-2 sm:justify-start">
         <span
           onClick={() => setFilter(Filter.All)}
@@ -172,7 +172,7 @@ export default function Home() {
             <img
               src="/not-found.webp"
               alt="Not found image"
-              className="mx-auto block max-w-[400px]"
+              className="mx-auto block w-full max-w-[400px]"
             />
             <p className="mt-4 text-center text-gray-400">
               No todos found! <br /> Add some todos to get started.

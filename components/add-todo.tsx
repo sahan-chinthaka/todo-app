@@ -1,7 +1,6 @@
 import { api, cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
@@ -14,17 +13,37 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
+import { TodoType } from "@/lib/types";
+import { useAuth } from "@/context/auth";
+import { useToast } from "@/hooks/use-toast";
 
-function AddTodo({ update }: { update: () => void }) {
+function AddTodo({
+  update,
+  setTodos,
+}: {
+  update: () => void;
+  todos?: TodoType[];
+  setTodos: Dispatch<SetStateAction<TodoType[] | undefined>>;
+}) {
   const [date, setDate] = useState<Date>();
   const resetButton = useRef<HTMLButtonElement>(null);
-  const [disabled, setDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(true);
   const [dateOption, setDateOption] = useState<
     "today" | "tomorrow" | "next-week" | "date" | ""
   >("");
+  const auth = useAuth();
+  const offlineCounter = useRef(0);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (auth !== undefined) {
+      setDisabled(false);
+    }
+  }, [auth]);
 
   function submit(e: any) {
     e.preventDefault();
+
     const formData = new FormData(e.target as HTMLFormElement);
     const name = formData.get("name");
 
@@ -47,6 +66,27 @@ function AddTodo({ update }: { update: () => void }) {
       d = undefined;
     }
 
+    if (auth === null) {
+      setTodos((prev) => [
+        ...prev!,
+        {
+          _id: `offline-${offlineCounter.current++}`,
+          name: name as string,
+          description: description as string,
+          date: d,
+          userId: "offline",
+        },
+      ]);
+      toast({
+        title: "Todo added successfully",
+      });
+
+      if (resetButton.current) {
+        resetButton.current.click();
+      }
+      return;
+    }
+
     setDisabled(true);
     api
       .post("/api/todo", {
@@ -57,17 +97,17 @@ function AddTodo({ update }: { update: () => void }) {
       })
       .then((res) => {
         if (res.data.done) {
-          toast.success("Todo added successfully");
+          toast({ title: "Todo added successfully" });
           update();
           if (resetButton.current) {
             resetButton.current.click();
           }
         } else {
-          toast.error(res.data.message);
+          toast(res.data.message);
         }
       })
       .catch((e) => {
-        toast.error(e.message);
+        toast(e.message);
       })
       .finally(() => {
         setDisabled(false);
@@ -76,10 +116,15 @@ function AddTodo({ update }: { update: () => void }) {
 
   return (
     <form onSubmit={submit}>
-      <div className="flex flex-col gap-2 rounded border p-2">
-        <Input placeholder="Add a todo" name="name" autoComplete="off" />
+      <div className="flex flex-col gap-2 rounded-lg border bg-white p-4 shadow-sm">
+        <div className="mb-2 font-semibold">New Todo</div>
+        <Input
+          placeholder="What is your next task?"
+          name="name"
+          autoComplete="off"
+        />
         <Textarea
-          placeholder="Describe your todo here (optional)"
+          placeholder="Describe the task - optional"
           className="max-h-[150px]"
           name="description"
           autoComplete="off"

@@ -2,9 +2,10 @@ import { useToast } from "@/hooks/use-toast";
 import { TodoType } from "@/lib/types";
 import { api } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
-import { Dispatch, SetStateAction, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import { ToastAction } from "./ui/toast";
+import { useAuth } from "@/context/auth";
 
 function TodoView({
   todo,
@@ -18,16 +19,17 @@ function TodoView({
   const { toast } = useToast();
   const duration = 5000;
   const tempTodos = useRef<TodoType[] | undefined>(undefined);
+  const auth = useAuth();
 
   function deleteTodo() {
     tempTodos.current = todos ? [...todos] : undefined;
     setTodos((todos) => todos?.filter((t) => t._id !== todo._id));
 
     let t: any = undefined;
-    
+
     const deleteTimeOut = setTimeout(() => {
+      if (auth === null) return;
       api.delete(`/api/todo/${todo._id}`).then(() => {
-        console.log("Deleted:", todo._id);
         if (t) t.dismiss();
       });
     }, duration);
