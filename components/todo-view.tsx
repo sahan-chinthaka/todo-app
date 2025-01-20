@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import { Dispatch, SetStateAction, useRef } from "react";
 import { Button } from "./ui/button";
 import { ToastAction } from "./ui/toast";
+import { EditTodo } from "./todo-edit";
 
 function TodoView({
   todo,
@@ -58,7 +59,8 @@ function TodoView({
         <div>
           <p>{todo.name}</p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center space-x-2">
+          <EditTodo setTodos={setTodos} todo={todo} />
           <Button variant="outline" onClick={deleteTodo}>
             <Trash2 size={16} />
           </Button>
