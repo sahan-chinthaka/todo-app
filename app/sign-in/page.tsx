@@ -10,10 +10,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { Auth } from "@/lib/firebase";
 import { SignInFormSchema } from "@/lib/forms";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,9 +26,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ForgotPassword from "./forgot-password";
 
+const provider = new GoogleAuthProvider();
+
 function SignInPage() {
   const [disabled, setDisabled] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof SignInFormSchema>>({
     resolver: zodResolver(SignInFormSchema),
@@ -53,7 +61,7 @@ function SignInPage() {
 
   return (
     <div>
-      <div className="mx-auto mt-10 w-full max-w-[400px] rounded border border-gray-200 p-5 shadow-sm">
+      <div className="mx-auto mt-2 w-full max-w-[400px] rounded border border-gray-200 p-5 shadow-sm sm:mt-10">
         <h2 className="text-center">Sign in to Todo App</h2>
         <Form {...form}>
           <form
@@ -103,6 +111,25 @@ function SignInPage() {
             </div>
           </form>
         </Form>
+        <div className="mt-5">
+          <Button
+            disabled={disabled}
+            variant="outline"
+            className="flex w-full items-center justify-center gap-2 font-semibold"
+            onClick={() => {
+              signInWithPopup(Auth, provider)
+                .then(() => {
+                  router.push("/");
+                })
+                .catch((e) => {
+                  toast({ title: "Error: " + e.code });
+                });
+            }}
+          >
+            <img src="/google.png" alt="Google icon" width={20} />
+            <span>Continue with Google</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
