@@ -1,3 +1,6 @@
+import { useAuth } from "@/context/auth";
+import { useToast } from "@/hooks/use-toast";
+import { TodoType } from "@/lib/types";
 import { api, cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -13,9 +16,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
-import { TodoType } from "@/lib/types";
-import { useAuth } from "@/context/auth";
-import { useToast } from "@/hooks/use-toast";
 
 function AddTodo({
   update,
@@ -147,10 +147,11 @@ function AddTodo({
               <SelectItem value="next-week">Next week</SelectItem>
               <SelectItem value="date">Pick a date</SelectItem>
               {dateOption && (
-                <SelectItem value="remove" className="w-full cursor-pointer">
-                  <div className="w-full border p-2 text-center text-destructive">
-                    Remove Due Date
-                  </div>
+                <SelectItem
+                  value="remove"
+                  className="flex w-full cursor-pointer items-center justify-center p-2 text-destructive"
+                >
+                  Remove Due Date
                 </SelectItem>
               )}
             </SelectContent>
