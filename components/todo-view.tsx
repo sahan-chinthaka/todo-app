@@ -23,9 +23,10 @@ function TodoView({
     tempTodos.current = todos ? [...todos] : undefined;
     setTodos((todos) => todos?.filter((t) => t._id !== todo._id));
 
-    let t: any;
+    let t: any = undefined;
+    
     const deleteTimeOut = setTimeout(() => {
-      api.delete(`/api/todo/${todo._id}`).then((res) => {
+      api.delete(`/api/todo/${todo._id}`).then(() => {
         console.log("Deleted:", todo._id);
         if (t) t.dismiss();
       });
